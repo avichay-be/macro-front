@@ -905,6 +905,13 @@ export function CbsDashboardApp() {
                   {isRefreshing ? "מרענן..." : "רענון נתונים"}
                 </button>
                 <button
+                  className="no-print rounded-full border border-[rgba(226,232,240,0.24)] bg-[rgba(255,255,255,0.08)] px-4 py-2 text-sm font-medium text-[#f8fbff] transition hover:border-[rgba(226,232,240,0.46)] hover:bg-[rgba(255,255,255,0.14)]"
+                  onClick={() => window.print()}
+                  type="button"
+                >
+                  ייצוא PDF
+                </button>
+                <button
                   className="rounded-full border border-[rgba(226,232,240,0.24)] bg-[rgba(255,255,255,0.08)] px-4 py-2 text-sm font-medium text-[#f8fbff] transition hover:border-[rgba(226,232,240,0.46)] hover:bg-[rgba(255,255,255,0.14)]"
                   onClick={() => {
                     startTransition(() => setView("home"));

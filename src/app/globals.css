@@ -218,6 +218,57 @@ body::after {
   }
 }
 
+@media print {
+  @page {
+    size: A4;
+    margin: 16mm 14mm;
+  }
+
+  body {
+    background: white !important;
+    color: #13202b !important;
+  }
+
+  body::before,
+  body::after {
+    display: none !important;
+  }
+
+  .no-print {
+    display: none !important;
+  }
+
+  .page-orb {
+    display: none !important;
+  }
+
+  .hero-panel {
+    background: #0f172a !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+    break-inside: avoid;
+  }
+
+  .surface-panel,
+  .surface-panel--dark,
+  .metric-panel,
+  .chart-panel {
+    box-shadow: none !important;
+    backdrop-filter: none !important;
+    break-inside: avoid;
+  }
+
+  .fade-up {
+    opacity: 1 !important;
+    animation: none !important;
+    transform: none !important;
+  }
+
+  canvas {
+    max-width: 100% !important;
+  }
+}
+
 @keyframes drift {
   0%,
   100% {

@@ -28,7 +28,6 @@ export const BOI_SERIES_DEFINITIONS: BoiSeriesDefinition[] = [
     version: "1.0",
     seriesCode: "MNT_RIB_BOI_D",
     startPeriod: "2016-01",
-    queryKey: "all",
     aggregate: "month-end",
   },
   {
