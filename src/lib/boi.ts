@@ -4,8 +4,7 @@ import { toCsv, type SourceTableRow } from "@/lib/source-table";
 import type { BoiDashboardSummary, BoiPoint, BoiSeries } from "@/lib/boi-types";
 
 const DEFAULT_TIMEOUT_MS = 30_000;
-const BOI_SDMX_API = "https://edge.boi.gov.il/FusionEdgeServer/sdmx/v2";
-//const DEFAULT_START_PERIOD = `${new Date().getUTCFullYear() - 10}-01`;
+const BOI_SDMX_API = "https://edge.boi.gov.il/FusionEdgeServer/ws/public/sdmxapi/rest";
 
 const dimensionCountCache = new Map<string, Promise<number>>();
 
@@ -146,11 +145,9 @@ async function getDimensionCount(definition: Extract<BoiSeriesDefinition, { kind
 }
 
 async function fetchSdmxSeries(definition: Extract<BoiSeriesDefinition, { kind: "sdmx" }>): Promise<BoiSeries> {
-  const key =
-    definition.queryKey ??
-    wildcardKey(definition.seriesCode, await getDimensionCount(definition));
+  const key = definition.queryKey ?? definition.seriesCode;
   const xml = await fetchText(
-    `${BOI_SDMX_API}/data/dataflow/${definition.agencyId}/${definition.dataflowId}/${definition.version}/${key}?startperiod=${definition.startPeriod}&format=compact_2_1`,
+    `${BOI_SDMX_API}/data/${definition.agencyId},${definition.dataflowId},${definition.version}/${key}?startPeriod=${definition.startPeriod}`,
   );
   const parsed = parseSdmxSeries(xml);
 
