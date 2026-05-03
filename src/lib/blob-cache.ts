@@ -78,6 +78,7 @@ export async function withWeeklyBlobCache<T>(key: string, loader: () => Promise<
       return value;
     } catch (error) {
       if (cached) {
+        console.error(`[blob-cache] loader failed for "${key}", serving stale cache from ${cached.updatedAt}:`, error);
         return cached.value;
       }
 
@@ -115,6 +116,7 @@ export async function withWeeklyBlobArtifacts<T>(
       return result.value;
     } catch (error) {
       if (cached) {
+        console.error(`[blob-cache] loader failed for "${key}", serving stale cache from ${cached.updatedAt}:`, error);
         return cached.value;
       }
 

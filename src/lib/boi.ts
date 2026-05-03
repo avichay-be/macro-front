@@ -4,8 +4,8 @@ import { toCsv, type SourceTableRow } from "@/lib/source-table";
 import type { BoiDashboardSummary, BoiPoint, BoiSeries } from "@/lib/boi-types";
 
 const DEFAULT_TIMEOUT_MS = 30_000;
-const BOI_SDMX_API = "https://edge.boi.gov.il/FusionEdgeServer/ws/public/sdmxapi/rest";
-const DEFAULT_START_PERIOD = `${new Date().getUTCFullYear() - 10}-01`;
+const BOI_SDMX_API = "https://edge.boi.gov.il/FusionEdgeServer/sdmx/v2";
+//const DEFAULT_START_PERIOD = `${new Date().getUTCFullYear() - 10}-01`;
 
 const dimensionCountCache = new Map<string, Promise<number>>();
 
@@ -141,6 +141,7 @@ async function getDimensionCount(definition: Extract<BoiSeriesDefinition, { kind
   })();
 
   dimensionCountCache.set(cacheKey, nextLoad);
+  nextLoad.catch(() => dimensionCountCache.delete(cacheKey));
   return nextLoad;
 }
 
@@ -149,7 +150,7 @@ async function fetchSdmxSeries(definition: Extract<BoiSeriesDefinition, { kind: 
     definition.queryKey ??
     wildcardKey(definition.seriesCode, await getDimensionCount(definition));
   const xml = await fetchText(
-    `${BOI_SDMX_API}/data/${definition.agencyId},${definition.dataflowId},${definition.version}/${key}?startPeriod=${DEFAULT_START_PERIOD}`,
+    `${BOI_SDMX_API}/data/dataflow/${definition.agencyId}/${definition.dataflowId}/${definition.version}/${key}?startperiod=${definition.startPeriod}&format=compact_2_1`,
   );
   const parsed = parseSdmxSeries(xml);
 
@@ -176,7 +177,10 @@ async function fetchSdmxSeries(definition: Extract<BoiSeriesDefinition, { kind: 
 }
 
 async function fetchBoiDashboardSummaryFresh(): Promise<BoiDashboardSummary> {
-  const series = await Promise.all(BOI_SERIES_DEFINITIONS.map((definition) => fetchSdmxSeries(definition)));
+  const results = await Promise.allSettled(BOI_SERIES_DEFINITIONS.map((definition) => fetchSdmxSeries(definition)));
+  const series = results
+    .filter((r): r is PromiseFulfilledResult<BoiSeries> => r.status === "fulfilled")
+    .map((r) => r.value);
 
   return {
     title: "BOI Macro Watchlist",
@@ -186,7 +190,7 @@ async function fetchBoiDashboardSummaryFresh(): Promise<BoiDashboardSummary> {
 }
 
 export async function fetchBoiDashboardSummary(): Promise<BoiDashboardSummary> {
-  return withWeeklyBlobArtifacts("boi-source-v2", async () => {
+  return withWeeklyBlobArtifacts("boi-source-v3", async () => {
     const value = await fetchBoiDashboardSummaryFresh();
     const rows: SourceTableRow[] = value.series.flatMap((series) =>
       series.points.map((point) => ({
